@@ -8,7 +8,8 @@ import numpy as np
 import tkinter as tk
 
 ## This function looks through all the available parameters in a file and opens a GUI that allows the user to select what features they want to base their model on
-def select_params(file_name):
+def select_params(property):
+    file_name = "poly_info_" + property + ".json"
     with open(file_name, "r") as file:
         data = json.load(file)
 
@@ -40,7 +41,10 @@ def select_params(file_name):
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     paramlist = tk.Listbox(list_frame, yscrollcommand=scrollbar.set, selectmode=tk.MULTIPLE)
     for line in range(len(prop_count.index)):
-        paramlist.insert(tk.END, prop_count.index[line] + " (" + str(prop_count.values[line]) + ")")
+        if prop_count.index[line] == "formula_weight":
+            paramlist.insert(tk.END, "Formula weight (" + str(prop_count.values[line]) + ")")
+        else:
+            paramlist.insert(tk.END, prop_count.index[line] + " (" + str(prop_count.values[line]) + ")")
     paramlist.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     scrollbar.config(command=paramlist.yview)
     # Define function for what happens when we click confirm button
@@ -55,9 +59,9 @@ def select_params(file_name):
 
     fs.mainloop()
 
+    print(selected_items)
     # return selected items
     return selected_items, data
-
 
 
 

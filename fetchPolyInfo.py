@@ -72,7 +72,7 @@ def authenticate(email, password, AUTH_URL):
 
 # This function takes in a property (formatted correctly) and a number of polymers, and outputs a .json file for quick access
 # I don't understand why but if I remove the website saves the entire thing breaks so DONT REMOVE THEM!!
-def fetch_poly_info(property_name, limit): 
+def fetch_poly_info(property_name, limit=50): 
 
     start_time = time.time()
     # Login info necessary to access PolyInfo
@@ -185,5 +185,3 @@ def fetch_poly_info(property_name, limit):
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"This successful query took {elapsed_time:.2f} seconds")
-
-fetch_poly_info("Radiation resistance", limit = 50)
