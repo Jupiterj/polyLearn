@@ -162,15 +162,15 @@ def fetch_poly_info(property_name, limit):
                 loaded_data = json.loads(decoded_results)
 
                 # Some polymers will not have SMILES or formula weights
-                if "formula_weight" in loaded_data[i]:
-                    loaded_data["polymer_data"][i]["formula_weight"] = loaded_data["formula_weight"]
-                if "smiles" in loaded_data[i]:
-                    loaded_data["polymer_data"][i]["smiles"] = loaded_data["smiles"]
+                if "formula_weight" in loaded_data:
+                    data["polymer_data"][i]["formula_weight"] = loaded_data["formula_weight"]
+                if "smiles" in loaded_data:
+                    data["polymer_data"][i]["smiles"] = loaded_data["smiles"]
                 success = True
             except Exception as e:
                 # Attempt to reauthenticate if error is thrown
                 retry_count += 1
-                print(f"Error occured on polymer {i}, query attempt {retry_count}: {e}")
+                print(f"Error occured on polymer {i+1}, query attempt {retry_count}: {e}")
                 if retry_count < max_retries:
                     time.sleep(2)
                     s, site4 = authenticate(email, password, AUTH_URL)

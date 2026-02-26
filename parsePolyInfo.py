@@ -15,6 +15,10 @@ def select_params(file_name):
     # Find all available parameters across all polymers in the .json file
     prop_list = [] # list all of the available parameters
     for i in range(len(data["polymer_data"])):
+        if "smiles" in data["polymer_data"][i]:
+            prop_list.append("SMILES")
+        if "formula_weight" in data["polymer_data"][i]:
+            prop_list.append("formula_weight")
         for j in range(len(data["polymer_data"][i]["property_summaries"])):
             for k in range(len(data["polymer_data"][i]["property_summaries"][j]["properties"])):
                 prop_list.append(data["polymer_data"][i]["property_summaries"][j]["properties"][k]["property_name"])

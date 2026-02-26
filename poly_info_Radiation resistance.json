@@ -209,7 +209,9 @@
           "ir_sample_name": "Polyethylene,low density",
           "ir_uuid": "df386722-8d89-5682-9ccc-b3a9b6c5fa67"
         }
-      ]
+      ],
+      "formula_weight": 14.03,
+      "smiles": "*C*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -329,7 +331,9 @@
           "ir_sample_name": "Polypropylene, isotactic",
           "ir_uuid": "f9c23142-069c-5f7b-9c53-629bab700733"
         }
-      ]
+      ],
+      "formula_weight": 42.08,
+      "smiles": "*CC(C)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -422,7 +426,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 56.11,
+      "smiles": "*CC(C)(C)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -639,7 +645,9 @@
           "ir_sample_name": "Polystyrene",
           "ir_uuid": "1a3eed52-1cf9-5817-9a45-326fcdc74c73"
         }
-      ]
+      ],
+      "formula_weight": 104.15,
+      "smiles": "*CC(c1ccccc1)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -687,7 +695,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 44.05,
+      "smiles": "*CC(O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -732,7 +742,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 193.24,
+      "smiles": "*CC(n1c2ccccc2c2c1cccc2)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -838,7 +850,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 100.12,
+      "smiles": "CCOC(=O)C(C*)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -930,7 +944,9 @@
           "ir_sample_name": "Poly(methyl methacrylate)",
           "ir_uuid": "df7b566f-3727-5ba8-a220-2417a697feef"
         }
-      ]
+      ],
+      "formula_weight": 100.12,
+      "smiles": "*C(C(=O)OC)(C*)C"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1051,7 +1067,9 @@
           "ir_sample_name": "Poly(vinyl chloride)",
           "ir_uuid": "af20f05e-b950-5c62-8cfc-ed96ba93a3e7"
         }
-      ]
+      ],
+      "formula_weight": 62.5,
+      "smiles": "*CC(Cl)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1107,7 +1125,9 @@
           "ir_sample_name": "Poly(vinylidene fluoride)",
           "ir_uuid": "3341fed7-feed-5f11-9682-c31a1cf24059"
         }
-      ]
+      ],
+      "formula_weight": 64.03,
+      "smiles": "*CC(F)(F)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1240,7 +1260,9 @@
           "ir_sample_name": "Poly(tetrafluoroethylene)",
           "ir_uuid": "5c2e3662-5b41-5706-a76e-4e193a904133"
         }
-      ]
+      ],
+      "formula_weight": 50.01,
+      "smiles": "*C(F)(F)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1367,7 +1389,9 @@
           "ir_sample_name": "Polychloroprene",
           "ir_uuid": "b3f6ba67-10a5-574a-9864-da31cd01d2b8"
         }
-      ]
+      ],
+      "formula_weight": 88.54,
+      "smiles": "*CCC=C(Cl)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1455,7 +1479,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 144.52,
+      "smiles": "*CCC(C(Cl)(F)*)(F)F"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1542,7 +1568,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 128.07,
+      "smiles": "*CCC(C(F)(F)*)(F)F"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1653,7 +1681,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 68.12,
+      "smiles": "*CC/C=C(/C)\\*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1685,7 +1715,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 88.54,
+      "smiles": "*CC/C=C(/Cl)\\*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1774,7 +1806,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 232.26,
+      "smiles": "*Oc1ccc(cc1)S(=O)(=O)c1ccc(cc1)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1864,7 +1898,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 442.53,
+      "smiles": "*Oc1ccc(cc1)S(=O)(=O)c1ccc(cc1)Oc1ccc(cc1)C(c1ccc(cc1)*)(C)C"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1926,7 +1962,9 @@
           "ir_sample_name": "Phenoxy resin",
           "ir_uuid": "2473e8b9-aed8-549a-8fe5-84fdefa13af7"
         }
-      ]
+      ],
+      "formula_weight": 284.35,
+      "smiles": "*CC(COc1ccc(cc1)C(c1ccc(cc1)O*)(C)C)O"
     },
     {
       "polymer_type": "Homopolymer",
@@ -1971,7 +2009,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 288.3,
+      "smiles": "*Oc1ccc(cc1)Oc1ccc(cc1)C(=O)c1ccc(cc1)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2002,7 +2042,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 550.52,
+      "smiles": "*c1cccc(c1)Oc1ccc(cc1)c1ccc(cc1)Oc1cccc(c1)n1c(=O)c2c(c1=O)cc1c(c2)c(=O)n(c1=O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2284,7 +2326,9 @@
           "ir_sample_name": "Poly(ethylene terephthalate)",
           "ir_uuid": "1ca3903b-d5e5-5219-bd8b-da19e805bb8b"
         }
-      ]
+      ],
+      "formula_weight": 192.17,
+      "smiles": "*CCOC(=O)c1ccc(cc1)C(=O)O*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2335,7 +2379,9 @@
           "ir_sample_name": "Poly(butylene terephthalate)",
           "ir_uuid": "dbe22eb1-1ca4-5fbe-aa50-4ccbbe04a936"
         }
-      ]
+      ],
+      "formula_weight": 220.22,
+      "smiles": "*CCCCOC(=O)c1ccc(cc1)C(=O)O*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2623,7 +2669,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 242.23,
+      "smiles": "*CCOC(=O)c1ccc2c(c1)ccc(c2)C(=O)O*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2715,7 +2763,9 @@
           "ir_sample_name": "Nylon 6",
           "ir_uuid": "5067059a-15a1-529d-aae0-847944de92e1"
         }
-      ]
+      ],
+      "formula_weight": 113.16,
+      "smiles": "*CCCCCC(=O)N*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2798,7 +2848,9 @@
           "ir_sample_name": "Nylon 6/6",
           "ir_uuid": "be89142a-41ab-5bff-80bd-eda177a345a0"
         }
-      ]
+      ],
+      "formula_weight": 226.32,
+      "smiles": "*CCCCCCNC(=O)CCCCC(=O)N*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2849,7 +2901,9 @@
           "ir_sample_name": "Nylon 6/10 [Poly(hexamethylene sebacamide)]",
           "ir_uuid": "d8082f51-2fc2-599c-8d02-6807b54728df"
         }
-      ]
+      ],
+      "formula_weight": 282.42,
+      "smiles": "*CCCCCCNC(=O)CCCCCCCCC(=O)N*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2903,7 +2957,9 @@
           "ir_sample_name": "Nylon 12",
           "ir_uuid": "de6b2457-2b5c-55a5-abde-5c628e61b498"
         }
-      ]
+      ],
+      "formula_weight": 197.32,
+      "smiles": "*CCCCCCCCCCCC(=O)N*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -2949,7 +3005,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 238.24,
+      "smiles": "*Nc1cccc(c1)NC(=O)c1cccc(c1)C(=O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3129,7 +3187,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 382.33,
+      "smiles": "*c1ccc(cc1)Oc1ccc(cc1)n1c(=O)c2c(c1=O)cc1c(c2)c(=O)n(c1=O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3202,7 +3262,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 380.35,
+      "smiles": "*c1ccc(cc1)Cc1ccc(cc1)n1c(=O)c2c(c1=O)cc1c(c2)c(=O)n(c1=O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3232,7 +3294,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 366.33,
+      "smiles": "*c1ccc(cc1)c1ccc(cc1)n1c(=O)c2c(c1=O)cc1c(c2)c(=O)n(c1=O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3381,7 +3445,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 458.42,
+      "smiles": "*c1ccc(cc1)Oc1ccc(cc1)N1C(=O)c2c(C1=O)cc(cc2)c1ccc2c(c1)C(=O)N(C2=O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3525,7 +3591,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 366.33,
+      "smiles": "*c1ccc(cc1)N1C(=O)c2c(C1=O)cc(cc2)c1ccc2c(c1)C(=O)N(C2=O)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3651,7 +3719,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 592.6,
+      "smiles": "*c1cccc(c1)N1C(=O)c2c(C1=O)cc(cc2)Oc1ccc(cc1)C(c1ccc(cc1)Oc1ccc2c(c1)C(=O)N(C2=O)*)(C)C"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3717,7 +3787,9 @@
           "ir_sample_name": "Polycarbonate",
           "ir_uuid": "092ccc1d-8302-5849-95a7-962d0ebe69ff"
         }
-      ]
+      ],
+      "formula_weight": 254.28,
+      "smiles": "*Oc1ccc(cc1)C(c1ccc(cc1)OC(=O)*)(C)C"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3817,7 +3889,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 74.15,
+      "smiles": "*O[Si](C)(C)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3831,7 +3905,9 @@
       "chemical_structure": [
         "data:image/png;base64,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"
       ],
-      "property_summaries": []
+      "property_summaries": [],
+      "formula_weight": 443.79,
+      "smiles": "*CC(c1ccc(cc1)C([Sn](C)(C)C)[Sn](C)(C)C)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3845,7 +3921,9 @@
       "chemical_structure": [
         "data:image/png;base64,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"
       ],
-      "property_summaries": []
+      "property_summaries": [],
+      "formula_weight": 262.54,
+      "smiles": "*CC(c1ccc(cc1)C([Si](C)(C)C)[Si](C)(C)C)*"
     },
     {
       "polymer_type": "Homopolymer",
@@ -3930,7 +4008,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 250.04,
+      "smiles": "FC(C(C(C(F)(F)F)(F)*)(F)F)(C(F)(F)*)F"
     },
     {
       "polymer_type": "Homopolymer",
@@ -4002,7 +4082,9 @@
             }
           ]
         }
-      ]
+      ],
+      "formula_weight": 214.06,
+      "smiles": "*C(CC(C(C(F)(F)F)(F)*)(F)F)(F)F"
     },
     {
       "polymer_type": "Homopolymer",
@@ -4016,7 +4098,9 @@
       "chemical_structure": [
         "data:image/png;base64,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"
       ],
-      "property_summaries": []
+      "property_summaries": [],
+      "formula_weight": 660.75,
+      "smiles": "*Oc1ccc(cc1)Oc1ccc(cc1C(C)C)C(=O)c1ccc(cc1)Oc1ccc(cc1)Oc1ccc(cc1)C(=O)c1ccc(c(c1)C(C)C)*"
     },
     {
       "polymer_type": "Copolymer",
