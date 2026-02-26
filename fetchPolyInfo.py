@@ -76,8 +76,8 @@ def fetch_poly_info(property_name, limit=50):
 
     start_time = time.time()
     # Login info necessary to access PolyInfo
-    email = "kirajm2@illinois.edu"
-    password = "Polymer111!"
+    email = "jadenjpt@stanford.edu"
+    password = "wEpmiv-nevcip-4pahvy"
     AUTH_URL = "https://polymer.nims.go.jp/"
     list_api = 5974882 # probably not stable?
     item_api = 6627766
@@ -99,7 +99,9 @@ def fetch_poly_info(property_name, limit=50):
                 "reference": {},
                 "limit": str(limit),  # Convert to string
                 "offset": 0,
-                "property": [{"property_name": property_name}]
+                "property": [{"property_name": property_name},
+                             {"property_name": "Density"},
+                             {"property_name": "Melting temperature"}]
             }
             print("Performing list query")
             results = s.post(api_url, json=search_params)
@@ -132,52 +134,52 @@ def fetch_poly_info(property_name, limit=50):
             print(f"Query failed. Re-authenticating (try {retry_count})...")
             s, site4 = authenticate(email, password, AUTH_URL)
 
-    # Unfortunately, we need to physically click into every polymer to get its SMILES representation. This means it is very easy to encounter a captcha. Just rerun it a couple times and it generally works....
-    # Query the API with search parameters, 
-    api_url = urljoin(site4.url, f"/PoLyInfo/api/{item_api}")
-    print("Performing individual polymer query")
-    for i in range(len(data["polymer_data"])):
-        max_retries = 3
-        retry_count = 0
-        success = False
-        while retry_count < max_retries and not success:
-            try: 
-                # Weird quirk where they name the UUIDs of homo and copolymers different things
-                if "polymer_uuid" in data["polymer_data"][i]:
-                    search_params = {
-                        "pid_uuid": data["polymer_data"][i]["polymer_uuid"]
-                    }
-                elif "copolymer_uuid" in data["polymer_data"][i]:
-                    search_params = {
-                        "pid_uuid": data["polymer_data"][i]["copolymer_uuid"]
-                    }
-                else:
-                    search_params = {
-                    "pid_uuid": data["polymer_data"][i]["blend_uuid"]
-                    }
-                results = s.post(api_url, json=search_params)
-                response_data = results.json()
-                # Decode from base64
-                decoded_results = base64.b64decode(response_data["json"])
-                loaded_data = json.loads(decoded_results)
+    # # Unfortunately, we need to physically click into every polymer to get its SMILES representation. This means it is very easy to encounter a captcha. Just rerun it a couple times and it generally works....
+    # # Query the API with search parameters, 
+    # api_url = urljoin(site4.url, f"/PoLyInfo/api/{item_api}")
+    # print("Performing individual polymer query")
+    # for i in range(len(data["polymer_data"])):
+    #     max_retries = 3
+    #     retry_count = 0
+    #     success = False
+    #     while retry_count < max_retries and not success:
+    #         try: 
+    #             # Weird quirk where they name the UUIDs of homo and copolymers different things
+    #             if "polymer_uuid" in data["polymer_data"][i]:
+    #                 search_params = {
+    #                     "pid_uuid": data["polymer_data"][i]["polymer_uuid"]
+    #                 }
+    #             elif "copolymer_uuid" in data["polymer_data"][i]:
+    #                 search_params = {
+    #                     "pid_uuid": data["polymer_data"][i]["copolymer_uuid"]
+    #                 }
+    #             else:
+    #                 search_params = {
+    #                 "pid_uuid": data["polymer_data"][i]["blend_uuid"]
+    #                 }
+    #             results = s.post(api_url, json=search_params)
+    #             response_data = results.json()
+    #             # Decode from base64
+    #             decoded_results = base64.b64decode(response_data["json"])
+    #             loaded_data = json.loads(decoded_results)
 
-                # Some polymers will not have SMILES or formula weights
-                if "formula_weight" in loaded_data:
-                    data["polymer_data"][i]["formula_weight"] = loaded_data["formula_weight"]
-                if "smiles" in loaded_data:
-                    data["polymer_data"][i]["smiles"] = loaded_data["smiles"]
-                success = True
-            except Exception as e:
-                # Attempt to reauthenticate if error is thrown
-                retry_count += 1
-                print(f"Error occured on polymer {i+1}, query attempt {retry_count}: {e}")
-                if retry_count < max_retries:
-                    time.sleep(2)
-                    s, site4 = authenticate(email, password, AUTH_URL)
-                else:
-                    print(f"Skipping polymer {i}, no access granted")
+    #             # Some polymers will not have SMILES or formula weights
+    #             if "formula_weight" in loaded_data:
+    #                 data["polymer_data"][i]["formula_weight"] = loaded_data["formula_weight"]
+    #             if "smiles" in loaded_data:
+    #                 data["polymer_data"][i]["smiles"] = loaded_data["smiles"]
+    #             success = True
+    #         except Exception as e:
+    #             # Attempt to reauthenticate if error is thrown
+    #             retry_count += 1
+    #             print(f"Error occured on polymer {i+1}, query attempt {retry_count}: {e}")
+    #             if retry_count < max_retries:
+    #                 time.sleep(2)
+    #                 s, site4 = authenticate(email, password, AUTH_URL)
+    #             else:
+    #                 print(f"Skipping polymer {i}, no access granted")
     
-    print("Individual polymer query successful")
+    # print("Individual polymer query successful")
     # Save data to .json file    
     with open(f"poly_info_{property_name}.json", "w") as f:
         json.dump(data, f, indent=2)
@@ -185,3 +187,5 @@ def fetch_poly_info(property_name, limit=50):
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"This successful query took {elapsed_time:.2f} seconds")
+
+fetch_poly_info("Glass transition temperature")
