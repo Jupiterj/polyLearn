@@ -6,7 +6,7 @@ from pandas import json_normalize
 
 
 def get_data(filename):
-    with open(data_filename, 'r') as f:
+    with open(filename, 'r') as f:
         data = json.load(f)
         
     # Import properties data into a pandas dataframe, keeping the polymer name as metadata
