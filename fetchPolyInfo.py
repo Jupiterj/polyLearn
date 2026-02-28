@@ -16,7 +16,16 @@ import json
 import base64
 import time
 
-def authenticate(email, password, AUTH_URL):
+# update this based on new logins
+def getlogin():
+    email = "jadenjpt@stanford.edu"
+    password = "wEpmiv-nevcip-4pahvy"
+
+    return email, password
+
+# This function performs the authentication process necessary to open the PolyInfo database
+# I don't understand why but if I remove the website saves the entire thing breaks so DONT REMOVE THEM!!
+def authenticate(email, password, AUTH_URL="https://polymer.nims.go.jp/"):
     # Re-authenticate if we get caught in a captcha
         ## Attempt to login to PolyInfo and create a session
     ## Site 1
@@ -71,21 +80,23 @@ def authenticate(email, password, AUTH_URL):
 
 
 # This function takes in a property (formatted correctly) and a number of polymers, and outputs a .json file for quick access
-# I don't understand why but if I remove the website saves the entire thing breaks so DONT REMOVE THEM!!
-def fetch_poly_info(property_name, limit=50): 
-
+def fetch_poly__list_info(property_names, limit=50): 
+    
     start_time = time.time()
-    # Login info necessary to access PolyInfo
-    email = "kirajm2@illinois.edu"
-    password = "Polymer111!"
     AUTH_URL = "https://polymer.nims.go.jp/"
     list_api = 5974882 # probably not stable?
-    item_api = 6627766
-    s, site4 = authenticate(email, password, AUTH_URL)
+    email, password = getlogin()
+    s, site4 = authenticate(email, password)
     max_retries = 3
     retry_count = 0
     success = 0
-    
+    # parse property names
+    count = 0
+    prop_list = []
+    while count < len(property_names):
+        prop_list.append({"property name": property_names[count]})
+        count = count + 1
+
     while retry_count < max_retries and not success:
         try: 
             # Submit search to get polymer list
@@ -99,7 +110,7 @@ def fetch_poly_info(property_name, limit=50):
                 "reference": {},
                 "limit": str(limit),  # Convert to string
                 "offset": 0,
-                "property": [{"property_name": property_name}]
+                "property": prop_list
             }
             print("Performing list query")
             results = s.post(api_url, json=search_params)
@@ -114,8 +125,8 @@ def fetch_poly_info(property_name, limit=50):
                 search_params["offset"] = offset
 
                 ###### Weird quirk of the radiation resistance query that does not apply for any other parameter to my knowledge
-                if property_name == "Radiation resistance":
-                    search_params["property"].append({"property_name": property_name})  
+                if "Radiation resistance" in property_names:
+                    search_params["property"].append({"property_name": "Radiation resistance"})  
                 ######
 
                 results = s.post(api_url, json=search_params)
@@ -132,7 +143,21 @@ def fetch_poly_info(property_name, limit=50):
             print(f"Query failed. Re-authenticating (try {retry_count})...")
             s, site4 = authenticate(email, password, AUTH_URL)
 
+    # Save data to .json file    
+    with open(f"poly_info_{property_names[0]}.json", "w") as f:
+        json.dump(data, f, indent=2)
+    
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"This successful query took {elapsed_time:.2f} seconds")
+
+# The function fetches SMILES data individually from PolyInfo, when inputted the polymer list data
+def fetch_poly_smiles_info(file_name):
     # Unfortunately, we need to physically click into every polymer to get its SMILES representation. This means it is very easy to encounter a captcha. Just rerun it a couple times and it generally works....
+    email, password = getlogin()
+    item_api = 6627766
+    s, site4 = authenticate(email, password)
+    data = json.load(file_name)
     # Query the API with search parameters, 
     api_url = urljoin(site4.url, f"/PoLyInfo/api/{item_api}")
     print("Performing individual polymer query")
@@ -173,15 +198,12 @@ def fetch_poly_info(property_name, limit=50):
                 print(f"Error occured on polymer {i+1}, query attempt {retry_count}: {e}")
                 if retry_count < max_retries:
                     time.sleep(2)
-                    s, site4 = authenticate(email, password, AUTH_URL)
+                    s, site4 = authenticate(email, password)
                 else:
                     print(f"Skipping polymer {i}, no access granted")
     
-    print("Individual polymer query successful")
     # Save data to .json file    
-    with open(f"poly_info_{property_name}.json", "w") as f:
+    filename = file_name.remove(".json") + "_smiles.json"
+    with open(filename, "w") as f:
         json.dump(data, f, indent=2)
-    
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"This successful query took {elapsed_time:.2f} seconds")
+    print("Individual polymer query successful")
