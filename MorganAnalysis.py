@@ -28,10 +28,13 @@ def convert_smiles(file_name, property):
             for j in range(len(data["polymer_data"][i]["property_summaries"])):
                 for k in range(len(data["polymer_data"][i]["property_summaries"][j]["properties"])):
                     if data["polymer_data"][i]["property_summaries"][j]["properties"][k]["property_name"] == property and "property_value_median" in data["polymer_data"][i]["property_summaries"][j]["properties"][k]:
-                        prop =  data["polymer_data"][i]["property_summaries"][j]["properties"][k]["property_value_median"]
-                        mol_list.append(mol)
-                        prop_list.append(prop)
-                        smiles_list.append(smiles)
+                        if mol is not None: 
+                            prop =  data["polymer_data"][i]["property_summaries"][j]["properties"][k]["property_value_median"]
+                            mol_list.append(mol)
+                            prop_list.append(prop)
+                            smiles_list.append(smiles)
+                        else: 
+                            print(f"There is an issue converting polymer {i+1} into MOL")
 
     prop_list = np.array(prop_list)
 
@@ -39,7 +42,8 @@ def convert_smiles(file_name, property):
     id_check = [mol is not None for mol in mol_list]
     if False in id_check:
         print("There is at least one polymer that could not be converted from SMILES")
-    
+    else:
+        "All polymers succcessfully converted from SMILES to Mol"
     return mol_list, prop_list
 
 # This function takes in the converted Mol format list, and outputs a Morgan fingerprint via the Morgan algorithm with a radius and vector size. I also designed three different fingerprint representations -- bit, count, and heavy metal normalized count
@@ -91,7 +95,8 @@ def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values,
                     performance.append(result)
     return performance
 
-mol_list, prop_list = convert_smiles("poly_info_Radiation resistance.json", "Radiation resistance")
+mol_list, prop_list = convert_smiles("new_smiles.json", "Glass transition temperature")
+
 alpha_values = [0.1, 1, 10, 100, 1000, 10000]
 radius_values = [1, 2, 3, 4, 5, 6]
 fpSize_values = [1024, 2048, 4096]
@@ -99,10 +104,10 @@ fp_types = ["bit", "count", "normalized"]
 foldmode = KFold(n_splits=5, shuffle=True, random_state = 2)
 results = runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode)
 
-with open("kfold_ablation.json", 'w') as f:
+with open("kfold_ablation_GTT.json", 'w') as f:
     data = json.dump(results, f, indent=2)
 
-with open("kfold_ablation.json", 'r') as f:
+with open("kfold_ablation_GTT.json", 'r') as f:
     data = json.load(f)
 
 # First, find the min and max of this dataset
