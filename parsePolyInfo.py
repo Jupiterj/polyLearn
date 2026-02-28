@@ -63,5 +63,5 @@ def select_params(property):
     # return selected items
     return selected_items, data
 
-
+select_params("Glass transition temperature")
 
