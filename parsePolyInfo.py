@@ -59,9 +59,9 @@ def select_params(property):
 
     fs.mainloop()
 
-    print(selected_items)
+    print(selected_items[0])
     # return selected items
-    return selected_items, data
+    return selected_items[0], data
 
-
+select_params("Glass transition temperature")
 
