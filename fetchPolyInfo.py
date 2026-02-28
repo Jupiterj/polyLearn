@@ -157,7 +157,8 @@ def fetch_poly_smiles_info(file_name):
     email, password = getlogin()
     item_api = 6627766
     s, site4 = authenticate(email, password)
-    data = json.load(file_name)
+    with open(file_name, "r") as file:
+        data = json.load(file)
     # Query the API with search parameters, 
     api_url = urljoin(site4.url, f"/PoLyInfo/api/{item_api}")
     print("Performing individual polymer query")
@@ -173,13 +174,11 @@ def fetch_poly_smiles_info(file_name):
                         "pid_uuid": data["polymer_data"][i]["polymer_uuid"]
                     }
                 elif "copolymer_uuid" in data["polymer_data"][i]:
-                    search_params = {
-                        "pid_uuid": data["polymer_data"][i]["copolymer_uuid"]
-                    }
+                    success = True
+                    continue
                 else:
-                    search_params = {
-                    "pid_uuid": data["polymer_data"][i]["blend_uuid"]
-                    }
+                    success = True
+                    continue
                 results = s.post(api_url, json=search_params)
                 response_data = results.json()
                 # Decode from base64
@@ -191,6 +190,7 @@ def fetch_poly_smiles_info(file_name):
                     data["polymer_data"][i]["formula_weight"] = loaded_data["formula_weight"]
                 if "smiles" in loaded_data:
                     data["polymer_data"][i]["smiles"] = loaded_data["smiles"]
+                print(f"Successful query of polymer {i+1}, moving on")
                 success = True
             except Exception as e:
                 # Attempt to reauthenticate if error is thrown
@@ -202,8 +202,9 @@ def fetch_poly_smiles_info(file_name):
                 else:
                     print(f"Skipping polymer {i}, no access granted")
     
-    # Save data to .json file    
-    filename = file_name.remove(".json") + "_smiles.json"
-    with open(filename, "w") as f:
+    # Save data to .json file      
+    with open(f"new_smiles.json", "w") as f:
         json.dump(data, f, indent=2)
     print("Individual polymer query successful")
+
+fetch_poly_smiles_info("poly_info_Glass transition temperature.json")
