@@ -1,4 +1,4 @@
-## This file serves as a hyperparameter ablation for the MorganFingerprint Generator built into RDKit. We first extract the relevant SMILES data and one desired property from a .json file. Then, we convert the SMILES data to a Mol object that is actionable by the RDKit API. We then conduct component ablation tests, assessing the LOOCV R^2 and RMSE for a Regularized Ridge Regression model. The three hyperparameters that are given as options for component ablation are lambda/alpha for regularization algorithm, and radius and vector size for the Morgan algorithm. Additionally, values are simultaneously reported for three ways to represent fingerprints - in Bit form, count form, and heavy metal normalized count form. Time is recorded, as computational efficiency also becomes a critical aspect when these datasets get much larger. 
+## This file serves as a hyperparameter ablation for the MorganFingerprint Generator built into RDKit. We first extract the relevant SMILES data and one desired property from a .json file. Then, we convert the SMILES data to a Mol object that is actionable by the RDKit API. We then conduct component ablation tests, assessing the R^2 and RMSE for a Regularized Ridge Regression model. The three hyperparameters that are given as options for component ablation are lambda/alpha for regularization algorithm, and radius and vector size for the Morgan algorithm. Additionally, values are simultaneously reported for three ways to represent fingerprints - in Bit form, count form, and heavy metal normalized count form. Time is recorded, as computational efficiency also becomes a critical aspect when these datasets get much larger. 
 
 import json
 from rdkit import Chem
@@ -6,7 +6,7 @@ import numpy as np
 from rdkit.Chem import rdFingerprintGenerator
 from sklearn import linear_model
 from sklearn.metrics import root_mean_squared_error, r2_score
-from sklearn.model_selection import cross_val_predict, LeaveOneOut
+from sklearn.model_selection import cross_val_predict, KFold, LeaveOneOut
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import time
@@ -42,55 +42,64 @@ def convert_smiles(file_name, property):
     
     return mol_list, prop_list
 
-def ridgeablation(mol_list, prop_list, alpha, radius, fpSize):
-    # Generate Fingerprints for each .mol polymer
-    fpgen = rdFingerprintGenerator.GetMorganGenerator(radius = radius, fpSize = fpSize) # Chirality is default to false, bond types is default to true
-    loo = LeaveOneOut() # we elect to do LOO cross validation
-    pipeline = Pipeline([
-        ('scaler', StandardScaler()),
-        ('ridge', linear_model.Ridge(alpha = alpha))
-    ]) 
+# This function takes in the converted Mol format list, and outputs a Morgan fingerprint via the Morgan algorithm with a radius and vector size. I also designed three different fingerprint representations -- bit, count, and heavy metal normalized count
+def generate_fingerprints(mol_list, radius, fpSize, fp_type="count"):
+    fpgen = rdFingerprintGenerator.GetMorganGenerator(radius=radius, fpSize=fpSize)
+    fp_list = np.zeros((len(mol_list), fpSize))
 
-    # Ablation 1 - Use Bit Fingerprints
-    bit_list = np.zeros((len(mol_list),fpSize))
-    for i in range(len(mol_list)):
-        bit_list[i] = fpgen.GetFingerprintAsNumPy(mol_list[i])
+    # Decide which type of fingerprint we want to generate
+    if fp_type == 'bit':
+        for i in range(len(mol_list)):
+            fp_list[i] = fpgen.GetFingerprintAsNumPy(mol_list[i])
+    elif fp_type == 'count':
+        for i in range(len(mol_list)):
+            fp_list[i] = fpgen.GetCountFingerprintAsNumPy(mol_list[i])
+    elif fp_type == 'normalized':
+        size_normalization = np.array([mol.GetNumHeavyAtoms() for mol in mol_list])
+        for i in range(len(mol_list)):
+            count_fp = fpgen.GetCountFingerprintAsNumPy(mol_list[i])
+            fp_list[i] = count_fp / size_normalization[i]
+    return fp_list
 
-    start = time.time()
-    prop_pred = cross_val_predict(pipeline, bit_list, prop_list, cv=loo)
-    end = time.time()
-    r2 = r2_score(prop_list, prop_pred)
-    rmse = root_mean_squared_error(prop_list, prop_pred)
-    print(f"Bit Fingerprint Ablation \nLOOCV Overall R²: {r2:.4f}")
-    print(f"LOOCV Overall RMSE: {rmse:.4f}")
-    print(f"This calculation took {end-start} seconds")
+# This function runs a full ablation study on the four hyperparameters we care about 1) alpha for ridge, radius and fpSize for the Morgan algorithm, and the actual fingerprint representation itself. I also built in an option to use different folds if we want to compare n-fold vs LeaveOneOut. 
+def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode):
+    performance = []
+    for i in range(len(alpha_values)):
+        for j in range(len(radius_values)):
+            for k in range(len(fpSize_values)):
+                for l in range(len(fp_types)):
+                    fp_data = generate_fingerprints(mol_list, radius_values[j], fpSize_values[k], fp_types[l])
+                    pipeline = Pipeline([
+                        ('scaler', StandardScaler()),
+                        ('ridge', linear_model.Ridge(alpha = alpha_values[i]))
+                    ]) 
+                    start_time = time.time()
+                    prop_pred = cross_val_predict(pipeline, fp_data, prop_list, cv=foldmode)
+                    end_time = time.time()
+                    r2 = r2_score(prop_list, prop_pred)
+                    rmse = root_mean_squared_error(prop_list, prop_pred)
+                    # Store results
+                    result = {
+                        'alpha': alpha_values[i],
+                        'radius': radius_values[j],
+                        'fpSize': fpSize_values[k],
+                        'fp_type': fp_types[l],
+                        'r2': r2,
+                        'rmse': rmse,
+                        'time': end_time-start_time
+                        }
+                    performance.append(result)
+    return performance
 
-    # Ablation 2 - Use Count Fingerprints
-    count_list = np.zeros((len(mol_list),fpSize))
-    for i in range(len(mol_list)):
-        count_list[i] = fpgen.GetCountFingerprintAsNumPy(mol_list[i])
+mol_list, prop_list = convert_smiles("poly_info_Radiation resistance.json", "Radiation resistance")
+alpha_values = [0.1, 1, 10, 100, 1000, 10000]
+radius_values = [1, 2, 3, 4, 5, 6]
+fpSize_values = [1024, 2048, 4096]
+fp_types = ["bit", "count", "normalized"]
+foldmode = KFold(n_splits=5, shuffle=True, random_state = 2)
+results = runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode)
 
-    start = time.time()
-    prop_pred = cross_val_predict(pipeline, count_list, prop_list, cv=loo)
-    end = time.time()
-    r2 = r2_score(prop_list, prop_pred)
-    rmse = root_mean_squared_error(prop_list, prop_pred)
-    print(f"\nCount Fingerprint Ablation \nLOOCV Overall R²: {r2:.4f}")
-    print(f"LOOCV Overall RMSE: {rmse:.4f}")
-    print(f"This calculation took {end-start} seconds")
+with open("kfold_ablation.json", 'w') as f:
+    json.dump(results, f)
 
-    # Ablation 3 - Use Density Normalized Count Fingerprints
-    size_normalization = np.array([mol.GetNumHeavyAtoms() for mol in mol_list])
-    normcount_list = np.zeros((len(mol_list),fpSize))
-    for i in range(len(mol_list)):
-        normcount_list[i] = count_list[i]/size_normalization[i]
-    
-    start = time.time()
-    prop_pred = cross_val_predict(pipeline, normcount_list, prop_list, cv=loo)
-    end = time.time()
-    r2 = r2_score(prop_list, prop_pred)
-    rmse = root_mean_squared_error(prop_list, prop_pred)
-    print(f"\nHeavy-Atom-Normalized Fingerprint Ablation \nLOOCV Overall R²: {r2:.4f}")
-    print(f"LOOCV Overall RMSE: {rmse:.4f}")
-    print(f"This calculation took {end-start} seconds")
 
