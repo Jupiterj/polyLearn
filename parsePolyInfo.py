@@ -63,5 +63,4 @@ def select_params(property):
     # return selected items
     return selected_items[0], data
 
-select_params("Glass transition temperature")
 
