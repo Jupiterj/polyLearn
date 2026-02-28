@@ -100,6 +100,15 @@ foldmode = KFold(n_splits=5, shuffle=True, random_state = 2)
 results = runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode)
 
 with open("kfold_ablation.json", 'w') as f:
-    json.dump(results, f)
+    data = json.dump(results, f, indent=2)
 
+with open("kfold_ablation.json", 'r') as f:
+    data = json.load(f)
 
+# First, find the min and max of this dataset
+min_idx = np.argmin([entry["r2"] for entry in data])
+max_idx = np.argmax([entry["r2"] for entry in data])
+print(data[min_idx])
+print(data[max_idx])
+
+## Next Step Here: we can take the ablation data and make heat maps or otherwise draw some conclusions about what parameters are best to optimize.
