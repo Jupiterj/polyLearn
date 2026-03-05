@@ -95,25 +95,25 @@ def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values,
                     performance.append(result)
     return performance
 
-mol_list, prop_list = convert_smiles("new_smiles.json", "Glass transition temperature")
+# mol_list, prop_list = convert_smiles("new_smiles.json", "Glass transition temperature")
 
-alpha_values = [0.1, 1, 10, 100, 1000, 10000]
-radius_values = [1, 2, 3, 4, 5, 6]
-fpSize_values = [1024, 2048, 4096]
-fp_types = ["bit", "count", "normalized"]
-foldmode = KFold(n_splits=5, shuffle=True, random_state = 2)
-results = runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode)
+# alpha_values = [0.1, 1, 10, 100, 1000, 10000]
+# radius_values = [1, 2, 3, 4, 5, 6]
+# fpSize_values = [1024, 2048, 4096]
+# fp_types = ["bit", "count", "normalized"]
+# foldmode = KFold(n_splits=5, shuffle=True, random_state = 2)
+# results = runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode)
 
-with open("kfold_ablation_GTT.json", 'w') as f:
-    data = json.dump(results, f, indent=2)
+# with open("kfold_ablation_GTT.json", 'w') as f:
+#     data = json.dump(results, f, indent=2)
 
-with open("kfold_ablation_GTT.json", 'r') as f:
-    data = json.load(f)
+# with open("kfold_ablation_GTT.json", 'r') as f:
+#     data = json.load(f)
 
-# First, find the min and max of this dataset
-min_idx = np.argmin([entry["r2"] for entry in data])
-max_idx = np.argmax([entry["r2"] for entry in data])
-print(data[min_idx])
-print(data[max_idx])
+# # First, find the min and max of this dataset
+# min_idx = np.argmin([entry["r2"] for entry in data])
+# max_idx = np.argmax([entry["r2"] for entry in data])
+# print(data[min_idx])
+# print(data[max_idx])
 
 ## Next Step Here: we can take the ablation data and make heat maps or otherwise draw some conclusions about what parameters are best to optimize.
