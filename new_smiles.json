@@ -20166,8 +20166,8 @@
           ]
         }
       ],
-      "formula_weight": 348.67,
-      "smiles": "[B]1234[B]567[B]89%10[B]%1115[B]152[B]2%12%13[C]%1431([B]146[C]378([B]92([B]%12%1413)[B]%10%115%13)*)[Si](C)(C)O[Si](C)(C)O[Si](C)(C)*"
+      "formula_weight_exclude": 348.67,
+      "smiles_exclude": "[B]1234[B]567[B]89%10[B]%1115[B]152[B]2%12%13[C]%1431([B]146[C]378([B]92([B]%12%1413)[B]%10%115%13)*)[Si](C)(C)O[Si](C)(C)O[Si](C)(C)*"
     },
     {
       "polymer_type": "Homopolymer",
