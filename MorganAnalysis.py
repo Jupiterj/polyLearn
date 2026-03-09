@@ -99,14 +99,12 @@ def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values,
 def run_PCA_ablation(mol_list, prop_list, alpha, radius, fpSize, fp_type, foldmode, n_components):
     performance = []
     fp_data = generate_fingerprints(mol_list, radius, fpSize, fp_type)
-    fp_data_centered = fp_data - np.mean(fp_data, axis=0)
-    pca = PCA(n_components = n_components)
-    fp_data_reduced = pca.fit_transform(fp_data_centered)
     pipeline = Pipeline([
         ('scaler', StandardScaler()),
+        ('pca', PCA(n_components=n_components)),
         ('ridge', linear_model.Ridge(alpha = alpha))
     ]) 
-    prop_pred = cross_val_predict(pipeline, fp_data_reduced, prop_list, cv=foldmode)
+    prop_pred = cross_val_predict(pipeline, fp_data, prop_list, cv=foldmode)
     r2 = r2_score(prop_list, prop_pred)
     return r2
 
@@ -118,14 +116,13 @@ def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, f
                 for l in range(len(fp_types)):
                     for m in range(len(n_components)):
                         fp_data = generate_fingerprints(mol_list, radius_values[j], fpSize_values[k], fp_types[l])
-                        pca = PCA(n_components = n_components[m])
-                        fp_data_reduced = pca.fit_transform(fp_data)
                         pipeline = Pipeline([
                             ('scaler', StandardScaler()),
+                            ('pca', PCA(n_components=n_components[m])),
                             ('ridge', linear_model.Ridge(alpha = alpha_values[i]))
-                        ]) 
+                        ])
                         start_time = time.time()
-                        prop_pred = cross_val_predict(pipeline, fp_data_reduced, prop_list, cv=foldmode)
+                        prop_pred = cross_val_predict(pipeline, fp_data, prop_list, cv=foldmode)
                         end_time = time.time()
                         r2 = r2_score(prop_list, prop_pred)
                         rmse = root_mean_squared_error(prop_list, prop_pred)
@@ -144,9 +141,32 @@ def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, f
     return performance
 
 mol_list, prop_list = convert_smiles("new_smiles.json", "Glass transition temperature")
-kfold = KFold(n_splits=5)
 
-perf = run_combined_PCAablation(mol_list, prop_list, alpha_values=[0.1, 1, 100, 1000, 10000], radius_values=[1, 2, 3, 4, 5, 6], fpSize_values= [1024, 2048, 4096], fp_types=["normalized"], foldmode=kfold, n_components=[2, 5, 10, 25, 50, 75, 100, 150])
+pca = PCA()
+scale = StandardScaler()
+fdata = generate_fingerprints(mol_list, radius = 3, fpSize=1024, fp_type="normalized")
+fdata_scaled = scale.fit_transform(fdata)
+fdata_pca = pca.fit_transform(fdata_scaled)
+plt.figure(figsize=(10, 6))
+plt.scatter(fdata_pca[:,0], fdata_pca[:,1], 30)
+# plt.xscale('log')
+plt.xticks(fontsize=11)
+plt.yticks(fontsize=11)
+plt.xlabel("PC1", fontsize = 14)
+plt.ylabel("PC2", fontsize = 14)
+plt.xlim((-10,10))
+plt.ylim((-10,10))
+# Set font to Calibri and increase font sizes
+plt.rcParams['font.size'] = 11
+plt.rcParams['axes.linewidth'] = 2
+plt.rcParams['lines.linewidth'] = 2.5
+plt.tight_layout()
+plt.show()
+
+# kfold = KFold(n_splits=5)
+# perf = run_combined_PCAablation(mol_list, prop_list, alpha_values=[0.1, 1, 100, 1000, 10000], radius_values=[1, 2, 3, 4, 5, 6], fpSize_values= [1024, 2048, 4096], fp_types=["normalized"], foldmode=kfold, n_components=[2, 5, 10, 25, 50, 75, 100])
+# Worst: {'alpha': 0.1, 'radius': 1, 'fpSize': 1024, 'fp_type': 'normalized', 'n_components': 100, 'r2': -0.22047361722423942, 'rmse': 94.576548596484, 'time': 0.36961984634399414}
+# Best: {'alpha': 1, 'radius': 3, 'fpSize': 1024, 'fp_type': 'normalized', 'n_components': 100, 'r2': 0.674779106537218, 'rmse': 48.82120366696248, 'time': 0.4665100574493408}
 
 # First, find the min and max of this dataset
 min_idx = np.argmin([entry["r2"] for entry in perf])
