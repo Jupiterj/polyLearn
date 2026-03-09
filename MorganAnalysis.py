@@ -10,7 +10,8 @@ from sklearn.model_selection import cross_val_predict, KFold, LeaveOneOut
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import time
-
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 
 # Start by putting data into format [MOL format, desired property]
@@ -95,25 +96,60 @@ def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values,
                     performance.append(result)
     return performance
 
+def run_PCA_ablation(mol_list, prop_list, alpha, radius, fpSize, fp_type, foldmode, n_components):
+    performance = []
+    fp_data = generate_fingerprints(mol_list, radius, fpSize, fp_type)
+    fp_data_centered = fp_data - np.mean(fp_data, axis=0)
+    pca = PCA(n_components = n_components)
+    fp_data_reduced = pca.fit_transform(fp_data_centered)
+    pipeline = Pipeline([
+        ('scaler', StandardScaler()),
+        ('ridge', linear_model.Ridge(alpha = alpha))
+    ]) 
+    prop_pred = cross_val_predict(pipeline, fp_data_reduced, prop_list, cv=foldmode)
+    r2 = r2_score(prop_list, prop_pred)
+    return r2
+
+def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode, n_components):
+    performance = []
+    for i in range(len(alpha_values)):
+        for j in range(len(radius_values)):
+            for k in range(len(fpSize_values)):
+                for l in range(len(fp_types)):
+                    for m in range(len(n_components)):
+                        fp_data = generate_fingerprints(mol_list, radius_values[j], fpSize_values[k], fp_types[l])
+                        pca = PCA(n_components = n_components[m])
+                        fp_data_reduced = pca.fit_transform(fp_data)
+                        pipeline = Pipeline([
+                            ('scaler', StandardScaler()),
+                            ('ridge', linear_model.Ridge(alpha = alpha_values[i]))
+                        ]) 
+                        start_time = time.time()
+                        prop_pred = cross_val_predict(pipeline, fp_data_reduced, prop_list, cv=foldmode)
+                        end_time = time.time()
+                        r2 = r2_score(prop_list, prop_pred)
+                        rmse = root_mean_squared_error(prop_list, prop_pred)
+                        # Store results
+                        result = {
+                            'alpha': alpha_values[i],
+                            'radius': radius_values[j],
+                            'fpSize': fpSize_values[k],
+                            'fp_type': fp_types[l],
+                            'n_components': n_components[m],
+                            'r2': r2,
+                            'rmse': rmse,
+                            'time': end_time-start_time
+                            }
+                        performance.append(result)
+    return performance
+
 mol_list, prop_list = convert_smiles("new_smiles.json", "Glass transition temperature")
+kfold = KFold(n_splits=5)
 
-alpha_values = [0.1, 1, 10, 100, 1000, 10000]
-radius_values = [1, 2, 3, 4, 5, 6]
-fpSize_values = [1024, 2048, 4096]
-fp_types = ["bit", "count", "normalized"]
-foldmode = KFold(n_splits=5, shuffle=True, random_state = 2)
-results = runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode)
-
-with open("kfold_ablation_GTT.json", 'w') as f:
-    data = json.dump(results, f, indent=2)
-
-with open("kfold_ablation_GTT.json", 'r') as f:
-    data = json.load(f)
+perf = run_combined_PCAablation(mol_list, prop_list, alpha_values=[0.1, 1, 100, 1000, 10000], radius_values=[1, 2, 3, 4, 5, 6], fpSize_values= [1024, 2048, 4096], fp_types=["normalized"], foldmode=kfold, n_components=[2, 5, 10, 25, 50, 75, 100, 150])
 
 # First, find the min and max of this dataset
-min_idx = np.argmin([entry["r2"] for entry in data])
-max_idx = np.argmax([entry["r2"] for entry in data])
-print(data[min_idx])
-print(data[max_idx])
-
-## Next Step Here: we can take the ablation data and make heat maps or otherwise draw some conclusions about what parameters are best to optimize.
+min_idx = np.argmin([entry["r2"] for entry in perf])
+max_idx = np.argmax([entry["r2"] for entry in perf])
+print(perf[min_idx])
+print(perf[max_idx])
