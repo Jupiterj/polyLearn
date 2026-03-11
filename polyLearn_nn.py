@@ -95,14 +95,31 @@ x = x[mask]
 y = y[mask]
 print(y.shape[0],'polymers with desired properties')
 
+# Incorporation of SMILES data 
+print('\n\nOnly with smiles data:')
+# load the ablation data for the fingerprinting
+with open("kfold_ablation_GTT.json", 'r') as f:
+    data = json.load(f)
+
+# Use the parameters that gave the highest R^2 for predicting glass transition temperature
+max_idx = np.argmax([entry["r2"] for entry in data])
+par_list = ['radius','fpSize','fp_type']
+pars = {key:data[max_idx][key] for key in par_list}
+
+mol_list = [Chem.MolFromSmiles(smiles) for smiles in polymer_smiles[mask]]
+fp_data = generate_fingerprints(mol_list,**pars)
+x = np.concatenate((x[:,n], fp_data), axis=1)
+
+print(x.shape)
+
 rng = np.random.default_rng(0)
 N = y.shape[0]
-d = len(n) # number of "materials descriptors"
+d = x.shape[1] # number of "materials descriptors"
 
 #####################################################
 ## Copy and Paste ##
 #####################################################
-y_train,y_test,X_train,X_test = train_test_split(y,x[:,n],test_size = 0.1,random_state=random_state)
+y_train,y_test,X_train,X_test = train_test_split(y,x,test_size = 0.1,random_state=random_state)
 
 # standardize the x and y values
 mu=X_train.mean(axis=0,keepdims=True)
@@ -132,27 +149,26 @@ class MLP(nn.Module):
     def forward(self,x):
         return self.net(x)
 model=MLP(d)
-# TODO : define optimizer (Adam , lr=1e-3)
+# define optimizer (Adam , lr=1e-3)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 
-# TODO : define loss function (MSE)
+# define loss function (MSE)
 loss_fn = nn.MSELoss()
-...
 #-----------------------------
 #5)Trainingloop
 #-----------------------------
-for epoch in range(1,501):
+for epoch in range(1,5000001):
     model.train()
     total_loss=0.0
     for xb,yb in train_loader:
-        #TODO:forwardpass
+        # forwardpass
         pred= model(xb)
 
-        #TODO:computeloss
+        # computeloss
         loss= loss_fn(pred, yb)
 
-        #TODO:backward+step
+        # backward+step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -167,5 +183,5 @@ for epoch in range(1,501):
             pred=model(xb)
             abs_err_sum+=torch.abs(pred-yb).sum().item()
     test_mae=abs_err_sum/len(test_ds)
-    if epoch%10==0:
+    if epoch%10000==0:
         print(f"Epoch {epoch:02d}|TrainMSE:{train_mse:.4f}|Test MAE:{test_mae:.4f}")
