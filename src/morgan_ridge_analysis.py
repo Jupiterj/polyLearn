@@ -13,8 +13,16 @@ from sklearn.decomposition import PCA
 from tqdm import tqdm
 
 
-# Start by putting data into format [MOL format, desired property]
+
 def convert_smiles(file_name, property):
+    # This function puts raw [SMILES, property] data into format [MOL format, desired property]
+    # Input: 
+    # file_name: the path to the .json file containing the raw data
+    # property: the property of interest that we want to predict
+
+    # Returns:
+    # mol_list: a list of the polymers in MOL format, which can be used for the RDKit Morgan algorithm
+    # prop_list: a list of the property values for the polymers, which will be used as the labels for the regression model
     with open(file_name, "r") as file:
         data = json.load(file)
     smiles_list = []
@@ -46,8 +54,16 @@ def convert_smiles(file_name, property):
         "All polymers succcessfully converted from SMILES to Mol"
     return mol_list, prop_list
 
-# This function takes in the converted Mol format list, and outputs a Morgan fingerprint via the Morgan algorithm with a radius and vector size. I also designed three different fingerprint representations -- bit, count, and heavy metal normalized count
 def generate_fingerprints(mol_list, radius, fpSize, fp_type="count"):
+    # This function takes in the converted Mol format list, and outputs a Morgan fingerprint via the Morgan algorithm with a radius and vector size. I also designed three different fingerprint representations -- bit, count, and heavy metal normalized count
+    # Input:
+    # mol_list: a list of the polymers in MOL format, which can be used for the RDKit Morgan algorithm
+    # radius: the radius hyperparameter for the Morgan algorithm
+    # fpSize: the vector size hyperparameter for the Morgan algorithm
+    # fp_type: the type of fingerprint representation
+    # Output:
+    # fp_list: a list of the Morgan fingerprints for each polymer
+
     fpgen = rdFingerprintGenerator.GetMorganGenerator(radius=radius, fpSize=fpSize)
     fp_list = np.zeros((len(mol_list), fpSize))
 
@@ -65,8 +81,20 @@ def generate_fingerprints(mol_list, radius, fpSize, fp_type="count"):
             fp_list[i] = count_fp / size_normalization[i]
     return fp_list
 
-# This function runs a full ablation study on the four hyperparameters we care about 1) alpha for ridge, radius and fpSize for the Morgan algorithm, and the actual fingerprint representation itself. I also built in an option to use different folds if we want to compare n-fold vs LeaveOneOut. 
+
 def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode):
+    # This function runs a full ablation study on the four hyperparameters we care about 1) alpha for ridge, radius and fpSize for the Morgan algorithm, and the actual fingerprint representation itself. I also built in an option to use different folds if we want to compare n-fold vs LeaveOneOut. 
+    # Input: 
+    # mol_list: a list of the polymers in MOL format, which can be used for the RDKit Morgan algorithm
+    # prop_list: a list of the property values for the polymers, which will be used as the labels for the regression model
+    # alpha_values: a list of the alpha values to test for the Ridge regression model
+    # radius_values: a list of the radius values to test for the Morgan algorithm
+    # fpSize_values: a list of the vector size values to test for the Morgan algorithm
+    # fp_types: a list of the fingerprint representation types to test
+    # foldmode: the type of cross validation to use
+
+    # Returns: 
+    # performance: R^2 and RMSE results in dictionary form
     performance = []
     total_runs = len(alpha_values)*len(radius_values)*len(fpSize_values)*len(fp_types)
     pbar = tqdm(total=total_runs, desc="Running raw ablations")
@@ -109,6 +137,12 @@ def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values,
 
 # Similar function but now integrates a PCA component
 def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode, n_components):
+    # Similar function to prev but now integrates a PCA component
+    # Input:
+    # n_components: a list of the number of components to test for PCA dimensionality reduction, which is added as an additional hyperparameter to ablate on top of the previous four.
+    # Output:
+    # performance: R^2 and RMSE results in dictionary form
+    
     performance = []
     n = 0
     total_runs = len(alpha_values)*len(radius_values)*len(fpSize_values)*len(fp_types)*len(n_components)

@@ -25,11 +25,19 @@ def getlogin():
 
     return email, password
 
-# This function performs the authentication process necessary to open the PolyInfo database
+
 # I don't understand why but if I remove the website saves the entire thing breaks so DONT REMOVE THEM!!
 def authenticate(email, password, AUTH_URL="https://polymer.nims.go.jp/"):
-    # Re-authenticate if we get caught in a captcha
-        ## Attempt to login to PolyInfo and create a session
+    # This function performs the authentication process necessary to open the PolyInfo database
+    # Input: 
+    # email: the email used to login to PolyInfo
+    # password: the password used to login to PolyInfo
+    # AUTH_URL: the URL for the PolyInfo login page
+    # Output:
+    # s: the authenticated session that can be used to make API calls
+    # site4: the final page reached prior to query search
+
+    ## Attempt to login to PolyInfo and create a session
     ## Site 1
     s = requests.Session()
     site1 = s.get(AUTH_URL, allow_redirects=True)
@@ -84,8 +92,15 @@ def authenticate(email, password, AUTH_URL="https://polymer.nims.go.jp/"):
     return s, site4
 
 
-# This function takes in a property (formatted correctly) and a number of polymers, and outputs a .json file for quick access
+
 def fetch_poly_list_info(property_names, limit=50): 
+    # This function takes in a property (formatted correctly) and a number of polymers, and outputs a .json file for quick access
+    # Input:
+    # property_names: a list of properties to query from PolyInfo
+    # limit: the number of polymers to query for each API call
+
+    # Output:
+    # A .json file containing the extracted data for the specified properties and number of polymers.
 
     start_time = time.time()
     AUTH_URL = "https://polymer.nims.go.jp/"
@@ -159,9 +174,14 @@ def fetch_poly_list_info(property_names, limit=50):
     elapsed_time = end_time - start_time
     print(f"This successful query took {elapsed_time:.2f} seconds")
 
-# The function fetches SMILES data individually from PolyInfo, when inputted the polymer list data
+
 def fetch_poly_smiles_info(file_name):
-    # Unfortunately, we need to physically click into every polymer to get its SMILES representation. This means it is very easy to encounter a captcha. Just rerun it a couple times and it generally works....
+    # Unfortunately, we need to physically click into every polymer to get its SMILES representation. The function fetches SMILES data individually from PolyInfo, when inputted the polymer list data
+    # Input:
+    # file_name: the path to the .json file containing the polymer list data extracted from the previous function
+    # Output:
+    # A .json file containing the extracted data for the specified properties and number of polymers, with the addition of SMILES and formula weight information for each polymer where available.
+    
     email, password = getlogin()
     item_api = 6627766
     s, site4 = authenticate(email, password)

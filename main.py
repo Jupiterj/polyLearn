@@ -15,13 +15,20 @@ import json
 PROJECT_ROOT = Path(__file__).resolve().parent
 SAMPLE_DATA_DIR = PROJECT_ROOT / "sample_data"
 
-def run_data_collection_selection():
+def run_data_collection_selection(fetch_property_names):
+    ""
     ############################
     # PART 1: Data Collection and Selection
     ############################
     # The data is already collected and saved in the "sample_data/new_smiles.json" file. Please note that we are technically not allowed to scrape data, so the functions in the else statement may be unstable and not guaranteed to permanently work due to potential bans. If you would like to run the data collection yourself (i.e. on other properties), feel free to make your own account and edit the info in getlogin() in fetch_data.py. NOTE that you will likely get banned after one go, so be warned!
     
-    fetch_property_names = ["Glass transition temperature", "Density", "Melting temperature"]
+    # Input:
+    # fetch_property_names: a list of property names to query from PolyInfo. The first property in the list will be used as the label for the model, and the rest will be used as features, by default.
+    # Output:
+    # existing_file: the path to the existing file containing the data, if it exists. If it does not exist, the data will be collected and saved to this file.
+    # selected_label: the label selected for the model, either through the GUI or defaulted to the first property in the list.
+    # selected_properties: the features selected for the model, either through the GUI or defaulted to the rest of the properties in the list + SMILES + formula weight.
+
     existing_file = SAMPLE_DATA_DIR / "new_smiles.json"
 
     print("\n================== DATA COLLECTION AND SELECTION ==================")
@@ -50,6 +57,14 @@ def ridge_fingerprint_analysis(existing_file, selected_label):
     # PART 2: Ridge Regression on Morgan Fingerprints
     ############################
     # The following functions are used in the first part of our report discussion, where we explore the hyperparameters involved in the MorganFingerprint algorithm contained within RDKit and how they can be optimized for a ridge regression model.
+
+    # Input:
+    # existing_file: the path to the existing file containing the extracted data.
+    # selected_label: the label selected for the model
+    # Output:
+    # ablation_path: the path to the file containing the results of the ablation study on the Morgan fingerprints, which will be used for the full linear model analysis.
+    # Plots and tables used in the report discussion.
+
     print("\n================== RIDGE REGRESSION ON MORGAN FINGERPRINTS ==================")
 
     mol_list, labels = convert_smiles(existing_file, selected_label[0]) 
@@ -92,6 +107,13 @@ def full_linear_model_analysis(existing_file, ablation_path, selected_label, sel
     ############################
     # The following functions now integrate all features and runs a linear regression model to determine the most important features for predicting the property of interest.
     
+    # Input:
+    # existing_file: the path to the existing file containing the extracted data.
+    # ablation_path: the path to the file containing the results of the ablation study on the Morgan fingerprints
+    # selected_label: the label selected for the model
+    # selected_properties: the features selected for the model
+    # Output:
+    # Plots used in the report discussion.
     print("\n================== COMPONENT ABLATION ON LINEAR MODELS ==================")
     comp_results = compare_components(existing_file, ablation_path, selected_label, selected_properties)
     # This function prints the results of Lasso and Ridge regression models with different combinations of features, with a newly optimized alpha value for each model. 
@@ -103,6 +125,15 @@ def nn_model_analysis(existing_file, ablation_path, selected_label, selected_pro
     # PART 4: Simple Neural Network model on all features
     ############################
     # The following function runs a simple MLP on all features, with the same inputs as for the linear regression model. The purpose is to determine if a non-linear model could potentially perform better with the same features.
+
+    # Input:
+    # existing_file: the path to the existing file containing the extracted data.
+    # ablation_path: the path to the file containing the results of the ablation study on the Morgan fingerprints
+    # selected_label: the label selected for the model
+    # selected_properties: the features selected for the model
+    # Output:
+    # Plots used in the report discussion.
+    
     print("\n================== NEURAL NETWORK ON FULL COMPONENTS ==================")
     nn_results = train_nn(existing_file, ablation_path, selected_label, selected_properties)
 
@@ -110,8 +141,10 @@ def nn_model_analysis(existing_file, ablation_path, selected_label, selected_pro
 
 
 def main():
+    # Set desired query properties
+    fetch_property_names = ["Glass transition temperature", "Density", "Melting temperature"]
     # Collect and select data
-    existing_file, selected_label, selected_properties = run_data_collection_selection()
+    existing_file, selected_label, selected_properties = run_data_collection_selection(fetch_property_names)
     # Run initial ablations on only the morgan fingerprints to determine hyperparameters
     ablation_path = ridge_fingerprint_analysis(existing_file, selected_label)
     # Conduct component ablation for all components of the linear model
