@@ -129,7 +129,7 @@ def compare_components(raw_file, ablation_file, prediction_list, property_list):
                 estimator=model,
                 param_grid=param_grid,
                 cv=inner_cv,
-                scoring="r2"
+                scoring="neg_root_mean_squared_error"
             )
             # Outer loop: model evaluation
             outer_cv = KFold(n_splits=5, shuffle=True, random_state=None)
@@ -142,19 +142,19 @@ def compare_components(raw_file, ablation_file, prediction_list, property_list):
                 scoring={
 
                     "r2": "r2",
-                    "mae": "neg_mean_absolute_error"
+                    "rmse": "neg_root_mean_squared_error"
                 }
             )
 
             print("R²: %.3f ± %.3f" % (scores["test_r2"].mean(), scores["test_r2"].std()))
-            print("MAE: %.3f ± %.3f" % (-scores["test_mae"].mean(), scores["test_mae"].std()))
+            print("RMSE: %.3f ± %.3f" % (-scores["test_rmse"].mean(), scores["test_rmse"].std()))
             result = {
                 'evaluation': labels[idx],
                 'model': model_name,
                 'r2': scores["test_r2"].mean(),
                 'r2_std': scores["test_r2"].std(),
-                'mae': -scores["test_mae"].mean(),
-                'mae_std': scores["test_mae"].std()
+                'rmse': -scores["test_rmse"].mean(),
+                'rmse_std': scores["test_rmse"].std()
                         }
             performance.append(result)
     return performance
