@@ -6,7 +6,7 @@ import numpy as np
 from rdkit.Chem import rdFingerprintGenerator
 from sklearn import linear_model
 from sklearn.metrics import root_mean_squared_error, r2_score
-from sklearn.model_selection import cross_val_predict, KFold, LeaveOneOut
+from sklearn.model_selection import cross_val_predict, KFold, LeaveOneOut, cross_validate
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import time
@@ -78,54 +78,59 @@ def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values,
                         ('scaler', StandardScaler()),
                         ('ridge', linear_model.Ridge(alpha = alpha_values[i]))
                     ]) 
+                    scoring = {
+                        'r2': 'r2',
+                        'rmse': 'neg_root_mean_squared_error'
+                    }
                     start_time = time.time()
-                    prop_pred = cross_val_predict(pipeline, fp_data, prop_list, cv=foldmode)
+                    result = cross_validate(pipeline, fp_data, prop_list, scoring=scoring, cv=foldmode)
                     end_time = time.time()
-                    r2 = r2_score(prop_list, prop_pred)
-                    rmse = root_mean_squared_error(prop_list, prop_pred)
+                    r2_mean = np.mean(result['test_r2'])
+                    rmse_mean = -1 * np.mean(result['test_rmse'])
+                    r2_std = np.std(result['test_r2'])
+                    rmse_std = np.std(result['test_rmse'])
                     # Store results
                     result = {
                         'alpha': alpha_values[i],
                         'radius': radius_values[j],
                         'fpSize': fpSize_values[k],
                         'fp_type': fp_types[l],
-                        'r2': r2,
-                        'rmse': rmse,
+                        'r2': r2_mean,
+                        'r2_std': r2_std,
+                        'rmse': rmse_mean,
+                        'rmse_std': rmse_std,
                         'time': end_time-start_time
                         }
                     performance.append(result)
     return performance
 
-def run_PCA_ablation(mol_list, prop_list, alpha, radius, fpSize, fp_type, foldmode, n_components):
-    performance = []
-    fp_data = generate_fingerprints(mol_list, radius, fpSize, fp_type)
-    pipeline = Pipeline([
-        ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=n_components)),
-        ('ridge', linear_model.Ridge(alpha = alpha))
-    ]) 
-    prop_pred = cross_val_predict(pipeline, fp_data, prop_list, cv=foldmode)
-    r2 = r2_score(prop_list, prop_pred)
-    return r2
-
+# Similar function but now integrates a PCA component
 def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode, n_components):
     performance = []
+    n = 0
     for i in range(len(alpha_values)):
         for j in range(len(radius_values)):
             for k in range(len(fpSize_values)):
                 for l in range(len(fp_types)):
                     for m in range(len(n_components)):
+                        n +=1
                         fp_data = generate_fingerprints(mol_list, radius_values[j], fpSize_values[k], fp_types[l])
                         pipeline = Pipeline([
                             ('scaler', StandardScaler()),
                             ('pca', PCA(n_components=n_components[m])),
                             ('ridge', linear_model.Ridge(alpha = alpha_values[i]))
                         ])
+                        scoring = {
+                        'r2': 'r2',
+                        'rmse': 'neg_root_mean_squared_error'
+                        }
                         start_time = time.time()
-                        prop_pred = cross_val_predict(pipeline, fp_data, prop_list, cv=foldmode)
+                        result = cross_validate(pipeline, fp_data, prop_list, scoring=scoring, cv=foldmode)
                         end_time = time.time()
-                        r2 = r2_score(prop_list, prop_pred)
-                        rmse = root_mean_squared_error(prop_list, prop_pred)
+                        r2_mean = np.mean(result['test_r2'])
+                        rmse_mean = -1 * np.mean(result['test_rmse'])
+                        r2_std = np.std(result['test_r2'])
+                        rmse_std = np.std(result['test_rmse'])
                         # Store results
                         result = {
                             'alpha': alpha_values[i],
@@ -133,65 +138,12 @@ def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, f
                             'fpSize': fpSize_values[k],
                             'fp_type': fp_types[l],
                             'n_components': n_components[m],
-                            'r2': r2,
-                            'rmse': rmse,
+                            'r2': r2_mean,
+                            'r2_std': r2_std,
+                            'rmse': rmse_mean,
+                            'rmse_std': rmse_std,
                             'time': end_time-start_time
                             }
                         performance.append(result)
+                        print("running ablation " + str(n))
     return performance
-
-mol_list, prop_list = convert_smiles("new_smiles.json", "Glass transition temperature")
-
-pca = PCA()
-scale = StandardScaler()
-fdata = generate_fingerprints(mol_list, radius = 3, fpSize=1024, fp_type="normalized")
-fdata_scaled = scale.fit_transform(fdata)
-fdata_pca = pca.fit_transform(fdata_scaled)
-plt.figure(figsize=(10, 6))
-plt.scatter(fdata_pca[:,0], fdata_pca[:,1], 30)
-# plt.xscale('log')
-plt.xticks(fontsize=11)
-plt.yticks(fontsize=11)
-plt.xlabel("PC1", fontsize = 14)
-plt.ylabel("PC2", fontsize = 14)
-plt.xlim((-10,10))
-plt.ylim((-10,10))
-# Set font to Calibri and increase font sizes
-plt.rcParams['font.size'] = 11
-plt.rcParams['axes.linewidth'] = 2
-plt.rcParams['lines.linewidth'] = 2.5
-plt.tight_layout()
-plt.show()
-
-# kfold = KFold(n_splits=5)
-# perf = run_combined_PCAablation(mol_list, prop_list, alpha_values=[0.1, 1, 100, 1000, 10000], radius_values=[1, 2, 3, 4, 5, 6], fpSize_values= [1024, 2048, 4096], fp_types=["normalized"], foldmode=kfold, n_components=[2, 5, 10, 25, 50, 75, 100])
-# Worst: {'alpha': 0.1, 'radius': 1, 'fpSize': 1024, 'fp_type': 'normalized', 'n_components': 100, 'r2': -0.22047361722423942, 'rmse': 94.576548596484, 'time': 0.36961984634399414}
-# Best: {'alpha': 1, 'radius': 3, 'fpSize': 1024, 'fp_type': 'normalized', 'n_components': 100, 'r2': 0.674779106537218, 'rmse': 48.82120366696248, 'time': 0.4665100574493408}
-
-# First, find the min and max of this dataset
-min_idx = np.argmin([entry["r2"] for entry in perf])
-max_idx = np.argmax([entry["r2"] for entry in perf])
-print(perf[min_idx])
-print(perf[max_idx])
-# mol_list, prop_list = convert_smiles("new_smiles.json", "Glass transition temperature")
-
-# alpha_values = [0.1, 1, 10, 100, 1000, 10000]
-# radius_values = [1, 2, 3, 4, 5, 6]
-# fpSize_values = [1024, 2048, 4096]
-# fp_types = ["bit", "count", "normalized"]
-# foldmode = KFold(n_splits=5, shuffle=True, random_state = 2)
-# results = runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode)
-
-# with open("kfold_ablation_GTT.json", 'w') as f:
-#     data = json.dump(results, f, indent=2)
-
-# with open("kfold_ablation_GTT.json", 'r') as f:
-#     data = json.load(f)
-
-# # First, find the min and max of this dataset
-# min_idx = np.argmin([entry["r2"] for entry in data])
-# max_idx = np.argmax([entry["r2"] for entry in data])
-# print(data[min_idx])
-# print(data[max_idx])
-
-## Next Step Here: we can take the ablation data and make heat maps or otherwise draw some conclusions about what parameters are best to optimize.
