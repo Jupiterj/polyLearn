@@ -9,7 +9,7 @@ from src.morgan_ridge_analysis import convert_smiles, runablation, run_combined_
 from src.polylearn_linear import compare_components
 from sklearn.model_selection import KFold
 from src.plot_morganRidge import fig1a, fig1b, table1, fig2a, fig2b
-from src.polylearn_nn import train_nn
+from src.polylearn_nn import train_nn,fig4
 import json
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -135,9 +135,9 @@ def nn_model_analysis(existing_file, ablation_path, selected_label, selected_pro
     # Plots used in the report discussion.
     
     print("\n================== NEURAL NETWORK ON FULL COMPONENTS ==================")
-    nn_results = train_nn(existing_file, ablation_path, selected_label, selected_properties)
+    nn_results = train_nn(existing_file, ablation_path, selected_label, selected_properties,epochs = 400,weight_decay = 1,lr=1e-3)
 
-    ##### TODO: @Jaden -- add your functions for plotting here. 
+    fig4(nn_results)
 
 
 def main():
