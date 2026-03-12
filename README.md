@@ -11,13 +11,13 @@ Our approach is as follows:
 
 ### Getting Started  
 ***Data Preparation***  
-No data preparation is required to run our model. Clicking on main.py will run through the entire study. The model is built on sample_data/new_smiles.json; however, our code is built to be completely self-sufficient, so if you don't have that file, we will query for you and build it out. However, be warned that PolyInfo has a policy against manual scraping, so excessive use of the query functionalities will likely lead to a ban on the account used. If this happens, please contact the authors so we may delete our data. You are free to apply for your own account using your @stanford.edu account at [this website](https://polymer.nims.go.jp/).
+  No data preparation is required to run our model. Clicking on main.py will run through the entire study. The model is built on sample_data/new_smiles.json; however, our code is built to be completely self-sufficient, so if you don't have that file, we will query for you and build it out. However, be warned that PolyInfo has a policy against manual scraping, so excessive use of the query functionalities will likely lead to a ban on the account used. If this happens, please contact the authors so we may delete our data. You are free to apply for your own account using your @stanford.edu account at [this website](https://polymer.nims.go.jp/).
   
 ***Package Installations***  
-Please run pip install -r requirements.txt prior to running main.py. RDKit is the speciality library used for cheminformatics.
+  Please run pip install -r requirements.txt prior to running main.py. RDKit is the speciality library used for cheminformatics.
   
 ***Running main.py***  
-The main script is completely self-sufficient. All outputs and monitoring can be done directly in terminal. Figures will pop up but will not save. Closing one figure will open the next one, in the order that they appear in the accompanying report. NOTE: TKinter GUI is an optional feature included in the script for data selection. The ability for this to run is dependant on your python version (3.9.7 works). 
+  The main script is completely self-sufficient. All outputs and monitoring can be done directly in terminal. Figures will pop up but will not save. Closing one figure will open the next one, in the order that they appear in the accompanying report. NOTE: TKinter GUI is an optional feature included in the script for data selection. The ability for this to run is dependant on your python version (3.9.7 works). 
 
 Running main.py performs the following steps:
 1. Load or collects data from PolyInfo
