@@ -36,7 +36,6 @@ def fig1a(data):
     stdlist = [np.std(val01), np.std(val1), np.std(val10), np.std(val100), np.std(val1000), np.std(val10000)]
     alphalist = [0.1, 1, 10, 100, 1000, 10000]
     x_pos = np.arange(len(alphalist))
-    plt.rcParams['font.family'] = 'Calibri'
     plt.rcParams['font.size'] = 25
     plt.rcParams['axes.linewidth'] = 3
     plt.rcParams['lines.linewidth'] = 3
@@ -72,7 +71,6 @@ def fig1b(data):
     stdlist = [np.std(val1), np.std(val2), np.std(val3)]
     fp_types = ["Bit", "Count", "Weighted"]
     x_pos = np.arange(len(fp_types))
-    plt.rcParams['font.family'] = 'Calibri'
     plt.rcParams['font.size'] = 19
     plt.rcParams['axes.linewidth'] = 3
     plt.rcParams['lines.linewidth'] = 3
@@ -94,11 +92,6 @@ def table1(data):
         json.dump(data, file, indent=2)
 
 def fig2a(data):
-    min_idx = np.argmin([entry["r2"] for entry in data])
-    max_idx = np.argmax([entry["r2"] for entry in data])
-    print(data[min_idx])
-    print(data[max_idx])
-
     file_name = "pca_ablation_results.json"
     with open(file_name, "w") as file:
         json.dump(data, file, indent=2)
@@ -121,7 +114,6 @@ def fig2a(data):
     stdlist = [np.std(val2), np.std(val10), np.std(val50), np.std(val100)]
     n_components = [2, 10, 50, 100]
     x_pos = np.arange(len(n_components))
-    plt.rcParams['font.family'] = 'Calibri'
     plt.rcParams['font.size'] = 19
     plt.rcParams['axes.linewidth'] = 3
     plt.rcParams['lines.linewidth'] = 3
@@ -156,7 +148,6 @@ def fig2b(mol_list, prop_list):
     fdata_scaled = scale.fit_transform(fdata)
     fdata_pca = pca.fit_transform(fdata_scaled)
 
-    plt.rcParams['font.family'] = 'Calibri'
     plt.rcParams['font.size'] = 25
     plt.rcParams['axes.linewidth'] = 3
     plt.rcParams['lines.linewidth'] = 3

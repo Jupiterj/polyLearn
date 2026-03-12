@@ -5,13 +5,12 @@ from rdkit import Chem
 import numpy as np
 from rdkit.Chem import rdFingerprintGenerator
 from sklearn import linear_model
-from sklearn.metrics import root_mean_squared_error, r2_score
-from sklearn.model_selection import cross_val_predict, KFold, LeaveOneOut, cross_validate
+from sklearn.model_selection import cross_validate
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import time
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
 # Start by putting data into format [MOL format, desired property]
@@ -69,6 +68,8 @@ def generate_fingerprints(mol_list, radius, fpSize, fp_type="count"):
 # This function runs a full ablation study on the four hyperparameters we care about 1) alpha for ridge, radius and fpSize for the Morgan algorithm, and the actual fingerprint representation itself. I also built in an option to use different folds if we want to compare n-fold vs LeaveOneOut. 
 def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode):
     performance = []
+    total_runs = len(alpha_values)*len(radius_values)*len(fpSize_values)*len(fp_types)
+    pbar = tqdm(total=total_runs, desc="Running raw ablations")
     for i in range(len(alpha_values)):
         for j in range(len(radius_values)):
             for k in range(len(fpSize_values)):
@@ -101,13 +102,17 @@ def runablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values,
                         'rmse_std': rmse_std,
                         'time': end_time-start_time
                         }
+                    pbar.update(1)
                     performance.append(result)
+    pbar.close()
     return performance
 
 # Similar function but now integrates a PCA component
 def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, fpSize_values, fp_types, foldmode, n_components):
     performance = []
     n = 0
+    total_runs = len(alpha_values)*len(radius_values)*len(fpSize_values)*len(fp_types)*len(n_components)
+    pbar = tqdm(total=total_runs, desc="Running PCA ablations")
     for i in range(len(alpha_values)):
         for j in range(len(radius_values)):
             for k in range(len(fpSize_values)):
@@ -144,6 +149,8 @@ def run_combined_PCAablation(mol_list, prop_list, alpha_values, radius_values, f
                             'rmse_std': rmse_std,
                             'time': end_time-start_time
                             }
+                        pbar.update(1)
                         performance.append(result)
-                        print("running ablation " + str(n))
+                        #print("running ablation " + str(n) + " of " + str(len(alpha_values)*len(radius_values)*len(fpSize_values)*len(fp_types)*len(n_components)))
+    pbar.close()
     return performance
