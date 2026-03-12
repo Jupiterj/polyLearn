@@ -1,1 +1,8 @@
-This file will detail what packages are needed to be installed to run our code
+numpy
+pandas
+requests
+bs4
+rdkit
+scikit-learn
+matplotlib
+torch

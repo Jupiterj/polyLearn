@@ -3,11 +3,10 @@
 ####################
 
 #### Tips for Debugging
-# 1. Don't remove the website saves points. If the code isn't working, check the .html files to see whether one of the steps is broken. Try deleting the saved .html files and re-running (sometimes this helps)
-# 2. Unsure if the API is stable, check via Chrome Dev Tools if API is no longer the same (search Fetch/XHR)
-# 3. Make sure to remove the highlighted search parameter for new pages if you are looking at everything other than radiation resistance (or double check the payload for the API call in Chrome Dev Tools)
-# 4. Sometimes the API call will fail just for fun... Give it a couple tries and that seems to do the trick. Might be running into a captcha or something on the backend. I added a reauth for the individually 
-
+# 1. Unsure if the API is stable, check via Chrome Dev Tools if API is no longer the same (search Fetch/XHR)
+# 2. Make sure to remove the highlighted search parameter for new pages if you are looking at everything other than radiation resistance (or double check the payload for the API call in Chrome Dev Tools)
+# 3. Sometimes the API call will fail just for fun... Give it a couple tries and that seems to do the trick. Might be running into a captcha or something on the backend. I added a reauth for the individually 
+from pathlib import Path
 import re
 from urllib.parse import urljoin
 import requests
@@ -16,10 +15,13 @@ import json
 import base64
 import time
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SAMPLE_DATA_DIR = PROJECT_ROOT / "sample_data"
+
 # update this based on new logins
 def getlogin():
-    email = "jadenjpt@stanford.edu"
-    password = "wEpmiv-nevcip-4pahvy"
+    email = "ldlin@stanford.edu"
+    password = "DSMLPolymer111!"
 
     return email, password
 
@@ -35,7 +37,8 @@ def authenticate(email, password, AUTH_URL="https://polymer.nims.go.jp/"):
     ## Find and access site 2
     link = soup1.find('a', class_='login')['href']
     site2 = s.get(link, allow_redirects=True)
-    with open("step2.html", "wb") as f:
+    file_name = SAMPLE_DATA_DIR / "step2.html"
+    with open(file_name, "wb") as f:
         f.write(site2.content)
     print("Accessing site 2")
     ## Find and access site 3
@@ -58,7 +61,8 @@ def authenticate(email, password, AUTH_URL="https://polymer.nims.go.jp/"):
         "p": policy,
     }
     site3 = s.get(link3, params=params, allow_redirects=True)
-    with open("step3.html", "wb") as f:
+    file_name = SAMPLE_DATA_DIR / "step3.html"
+    with open(file_name, "wb") as f:
         f.write(site3.content)
     print("Accessing site 3")
     ## Find and access site 4
@@ -73,15 +77,16 @@ def authenticate(email, password, AUTH_URL="https://polymer.nims.go.jp/"):
     forminp["identifier"] = email # fill in the email and password fields
     forminp["password"] = password
     site4 = s.post(action3, data=forminp, allow_redirects=True)
-    with open("step4.html", "wb") as f:
+    file_name = SAMPLE_DATA_DIR / "step4.html"
+    with open(file_name, "wb") as f:
         f.write(site4.content)
     print("Accessing site 4")
     return s, site4
 
 
 # This function takes in a property (formatted correctly) and a number of polymers, and outputs a .json file for quick access
-def fetch_poly__list_info(property_names, limit=50): 
-    
+def fetch_poly_list_info(property_names, limit=50): 
+
     start_time = time.time()
     AUTH_URL = "https://polymer.nims.go.jp/"
     list_api = 5974882 # probably not stable?
@@ -94,7 +99,7 @@ def fetch_poly__list_info(property_names, limit=50):
     count = 0
     prop_list = []
     while count < len(property_names):
-        prop_list.append({"property name": property_names[count]})
+        prop_list.append({"property_name": property_names[count]})
         count = count + 1
 
     while retry_count < max_retries and not success:
@@ -102,7 +107,8 @@ def fetch_poly__list_info(property_names, limit=50):
             # Submit search to get polymer list
             list_url = urljoin(site4.url, "/PoLyInfo/polymer-list")
             site5 = s.post(list_url, data={"strgkey_uuid": "STRGKEY_POLYMER_LIST_DATA"})
-            with open("step5.html", "wb") as f:
+            file_name = SAMPLE_DATA_DIR / "site5.html"
+            with open(file_name, "wb") as f:
                 f.write(site5.content)
             # Query the API with search parameters, 
             api_url = urljoin(site4.url, f"/PoLyInfo/api/{list_api}")
@@ -138,13 +144,15 @@ def fetch_poly__list_info(property_names, limit=50):
             success = True
             print("List query successful")
         except Exception as e:
+            print(e)
             time.sleep(5)
             retry_count += 1
             print(f"Query failed. Re-authenticating (try {retry_count})...")
             s, site4 = authenticate(email, password, AUTH_URL)
 
-    # Save data to .json file    
-    with open(f"poly_info_{property_names[0]}.json", "w") as f:
+    # Save data to .json file
+    file_name = SAMPLE_DATA_DIR / f"poly_info_{property_names[0]}.json"
+    with open(file_name, "w") as f:
         json.dump(data, f, indent=2)
     
     end_time = time.time()
@@ -203,8 +211,7 @@ def fetch_poly_smiles_info(file_name):
                     print(f"Skipping polymer {i}, no access granted")
     
     # Save data to .json file      
-    with open(f"new_smiles.json", "w") as f:
+    file_name = SAMPLE_DATA_DIR / "new_smiles.json"
+    with open(file_name, "w") as f:
         json.dump(data, f, indent=2)
     print("Individual polymer query successful")
-
-fetch_poly_smiles_info("poly_info_Glass transition temperature.json")

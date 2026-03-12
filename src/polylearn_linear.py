@@ -6,9 +6,9 @@ from pandas import json_normalize
 from sklearn import linear_model
 from sklearn.model_selection import KFold, GridSearchCV, cross_val_score,cross_validate
 from sklearn.metrics import mean_squared_error
-from MorganAnalysis import generate_fingerprints,convert_smiles
+from morgan_ridge_analysis import generate_fingerprints,convert_smiles
 from rdkit import Chem
-
+from pathlib import Path
 
 def get_data(filename):
     with open(filename, 'r') as f:
@@ -53,7 +53,10 @@ def kfold_val(x,y,alphas,_model,n_splits=10):
 
 
 # Main body
-data_filename = 'new_smiles.json'
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SAMPLE_DATA_DIR = PROJECT_ROOT / "sample_data"
+existing_file = SAMPLE_DATA_DIR / "new_smiles.json"
+data_filename = existing_file
 # data_filename = 'poly_info_Glass transition temperature.json'
 # data_filename = 'poly_info_Radiation resistance.json'
 df = get_data(data_filename)

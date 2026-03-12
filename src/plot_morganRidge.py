@@ -1,24 +1,17 @@
 # This file is used to analyze and plot results used in MF section of the Results portion of the paper
 import json
 import matplotlib.pyplot as plt
-import MorganAnalysis as mf
-from sklearn.model_selection import KFold, LeaveOneOut
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-import time
 from sklearn.decomposition import PCA
+import src.morgan_ridge_analysis as mf
 
 
 #######
 #  FIGURE 1(a)
 #######
 
-def fig1a():
-    mol_list, prop_list = mf.convert_smiles("new_smiles.json", "Glass transition temperature")
-    kfold = KFold(n_splits=5, shuffle=True, random_state = 2)
-    data = mf.runablation(mol_list, prop_list, alpha_values=[0.1, 1, 10, 100, 1000, 10000], radius_values=[1, 2, 3, 4, 5, 6],fpSize_values= [1024, 2048, 4096],fp_types=["bit", "count", "normalized"], foldmode=kfold)
-
+def fig1a(data):
     val01 = []
     val1 = []
     val10 = []
@@ -63,11 +56,7 @@ def fig1a():
 #  FIGURE 1(b)
 #########
 
-def fig1b():
-    mol_list, prop_list = mf.convert_smiles("new_smiles.json", "Glass transition temperature")
-    kfold = KFold(n_splits=5, shuffle=True, random_state = 2)
-    data = mf.runablation(mol_list, prop_list, alpha_values=[100], radius_values=[1, 2, 3, 4, 5, 6],fpSize_values= [1024, 2048, 4096],fp_types=["bit", "count", "normalized"], foldmode=kfold)
-
+def fig1b(data):
     val1 = []
     val2 = []
     val3 = []
@@ -99,19 +88,12 @@ def fig1b():
     plt.tight_layout()
     plt.show()
 
-def table1():
-    mol_list, prop_list = mf.convert_smiles("new_smiles.json", "Glass transition temperature")
-    kfold = KFold(n_splits=5, shuffle=True, random_state = 2)
-    data = mf.runablation(mol_list, prop_list, alpha_values=[100], radius_values=[1, 2, 4, 6],fpSize_values= [1024, 2048, 4096],fp_types=["normalized"], foldmode=kfold)
+def table1(data):
     file_name = "table1_results.json"
     with open(file_name, "w") as file:
         json.dump(data, file, indent=2)
 
-def fig2a():
-    mol_list, prop_list = mf.convert_smiles("new_smiles.json", "Glass transition temperature")
-    kfold = KFold(n_splits=5, shuffle=True, random_state = 2)
-    data = mf.run_combined_PCAablation(mol_list, prop_list, alpha_values=[0.1, 1, 10, 100, 1000, 10000], radius_values=[1, 2, 4, 6],fpSize_values= [1024, 2048, 4096],fp_types=["bit", "count", "normalized"], n_components=[2, 10, 50, 100], foldmode=kfold)
-
+def fig2a(data):
     min_idx = np.argmin([entry["r2"] for entry in data])
     max_idx = np.argmax([entry["r2"] for entry in data])
     print(data[min_idx])
@@ -155,10 +137,7 @@ def fig2a():
     plt.tight_layout()
     plt.show()
 
-def fig2b():
-    mol_list,prop_list = mf.convert_smiles("new_smiles.json", "Glass transition temperature")
-    print(prop_list)
-
+def fig2b(mol_list, prop_list):
     # Bin colours
     low_thres = np.percentile(prop_list, 33)
     high_thres = np.percentile(prop_list, 66)
@@ -194,5 +173,3 @@ def fig2b():
                     frameon=False)
     plt.tight_layout()
     plt.show()
-
-fig2b()    
