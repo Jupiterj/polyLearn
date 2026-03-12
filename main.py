@@ -19,7 +19,7 @@ def run_data_collection_selection():
     ############################
     # PART 1: Data Collection and Selection
     ############################
-    # The data is already collected and saved in the "sample_data/new_smiles.json" file. Please note that we are technically not allowed to scrape data, so the functions in the else statement may be unstable and not guaranteed to permanently work due to potential bans. If you would like to run the data collection yourself (i.e. on other properties), feel free to make your own account and edit the info in getlogin() in fetch_data.py.
+    # The data is already collected and saved in the "sample_data/new_smiles.json" file. Please note that we are technically not allowed to scrape data, so the functions in the else statement may be unstable and not guaranteed to permanently work due to potential bans. If you would like to run the data collection yourself (i.e. on other properties), feel free to make your own account and edit the info in getlogin() in fetch_data.py. NOTE that you will likely get banned after one go, so be warned!
     
     fetch_property_names = ["Glass transition temperature", "Density", "Melting temperature"]
     existing_file = SAMPLE_DATA_DIR / "new_smiles.json"
