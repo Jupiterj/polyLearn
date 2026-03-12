@@ -4,7 +4,7 @@
 Polymers are among the most difficult material classes to understand, owing to the complex interplay between their local chemical environments, global structures, and intramolecular interactions. This high degree of complexity makes it uniquely challenging to anticipate what a polymer's properties will be without experimental trial, which tends to be inefficient, expensive, and can lack repeatibility. One such property that is of particular interest in fields such as aerospace, electronics, and manufacturing is the glass transition temperature -- the temperature where a polymer rapidly transitions from being in a brittle, hard state to a soft, rubbery state. This project aims to accelerate the field of polymer discovery and design by training a machine learning model to predict glass transition temperature on a set of features that can be easily and conclusively extracted from a sample polymer. Namely, formula weight, density, melting temperature, and chemical structure. 
 
 Our approach is as follows:
-**Data Extraction**: We manually scrape data via request queries to the PolyInfo database. 
+\**Data Extraction**: We manually scrape data via request queries to the PolyInfo database. 
 
 **Data Selection and Processing**: Data is first cleaned (removing polymers that are blends and copolymers, or redundant). Then chemical names are converted into complex vectors via the Morgan Fingerprint (MF) algorithm. Prior to full model training, hyperparameter ablations are first conducted on the chemical structure datapoints to ensure that the MF itself is optimized. Principal Component Analysis (PCA) is tested to determine whether the MFs can be further reduced.
 
