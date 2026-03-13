@@ -3,9 +3,13 @@ import numpy as np
 import json
 from pandas import json_normalize
 from sklearn import linear_model
-from sklearn.model_selection import KFold, GridSearchCV, cross_val_score,cross_validate
+from sklearn.model_selection import RepeatedKFold,KFold, GridSearchCV, cross_val_score,cross_validate,cross_val_predict
+from sklearn.metrics import r2_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 from src.morgan_ridge_analysis import generate_fingerprints
 from rdkit import Chem
+import matplotlib.pyplot as plt
 
 def get_data(filename):
     # This file cleans up the extracted .json from PolyInfo
@@ -67,7 +71,9 @@ def compare_components(raw_file, ablation_file, prediction_list, property_list):
         ]
 
     labels = ['T_m, Density, Weight', 'T_m, Density', 'T_m, Weight', 'Density, Weight', 'SMILES only', 'All Features']
-    random_state = None
+    random_state1 = 78
+    random_state2 = 63
+
 
     # # Determines the number of datapoints for each property
     # properties = np.array(df.columns.tolist())[2:]
@@ -110,51 +116,128 @@ def compare_components(raw_file, ablation_file, prediction_list, property_list):
     y = (y-np.mean(y,axis = 0))/np.std(y,axis = 0)
 
     models = [
-        ['Lasso',linear_model.Lasso()],
-        ['Ridge',linear_model.Ridge()]
-        ]
-    param_grid = {
-        "alpha":np.linspace(0.01, 2, 100)
-    }
+        ['Lasso',
+        linear_model.Lasso(max_iter=10**6),
+        {
+            "model__alpha":np.logspace(-3, 3, 20,endpoint=True, base=10.0),
+            #  "model__alpha":np.linspace(0.01, 2, 100)
+            #  "alpha":np.linspace(99.01, 101, 10)
+        },
+        ],
+        ['Ridge',
+        linear_model.Ridge(max_iter=10**6),
+        {
+            "model__alpha":np.logspace(-3, 3, 20,endpoint=True, base=10.0),
+            #    "model__alpha":np.linspace(9.01, 11, 100)
+            },
+            ]
+    ]
     performance = []
     for idx,properties in enumerate(n):
         print('Components Evaluated:',labels[idx])
-        for model_name,model in models:
+        for model_name,model,param_grid in models:
             print(model_name)
             x2 = np.concatenate([x[:,slices] for slices in properties], axis=1)
             # print(x2.shape)
 
-            inner_cv = KFold(n_splits=5, shuffle=True, random_state=None)
+            pipeline = Pipeline([
+                ("scaler", StandardScaler()),
+                ("model", model)
+            ])
+            # Perform repeated nested kfold cross validations to optimize hyper-parameters and test model generalizability
+            inner_cv = KFold(n_splits=5, shuffle=True, random_state=random_state1)
             grid_search = GridSearchCV(
-                estimator=model,
+                pipeline,
                 param_grid=param_grid,
                 cv=inner_cv,
                 scoring="neg_root_mean_squared_error"
             )
             # Outer loop: model evaluation
-            outer_cv = KFold(n_splits=5, shuffle=True, random_state=None)
-
+            outer_cv = RepeatedKFold(
+                n_splits=5,
+                n_repeats=10,
+                random_state=random_state2
+            )
             scores = cross_validate(
                 grid_search,
                 x2,      # feature matrix
                 y,      # target values
                 cv=outer_cv,
                 scoring={
-
                     "r2": "r2",
-                    "rmse": "neg_root_mean_squared_error"
-                }
+                    "mse": "neg_root_mean_squared_error"
+                },
+                return_estimator=True
             )
 
+
+            all_preds = []
+            all_actual = []
+
+            for train_idx, test_idx in outer_cv.split(x2):
+
+                X_train, X_test = x2[train_idx], x2[test_idx]
+                y_train, y_test = y[train_idx], y[test_idx]
+
+                grid_search.fit(X_train, y_train)
+
+                best_model = grid_search.best_estimator_
+
+                preds = best_model.predict(X_test)
+
+                all_preds.extend(preds)
+                all_actual.extend(y_test)
+            # y_pred = cross_val_predict(model, x2, y, cv=outer_cv)
+            all_preds = np.array(all_preds)
+            all_actual = np.array(all_actual)
+
+            # Compute R^2
+            r2 = r2_score(all_actual,all_preds)
+
+            fig, ax = plt.subplots(figsize=(5,5))
+
+            # Scatter
+            ax.scatter(all_actual, all_preds, color='red', s=30)
+
+            # Perfect prediction line
+            lims = [
+                min(all_actual.min(), all_preds.min()),
+                max(all_actual.max(), all_preds.max())
+            ]
+
+            ax.plot(lims, lims, 'k-', linewidth=2)
+
+            ax.set_xlim(lims)
+            ax.set_ylim(lims)
+
+            # Labels
+            ax.set_xlabel("Experimental")
+            ax.set_ylabel("Predicted")
+
+            # Text box
+            text = f"""Property: {labels[idx]}
+            Regularization: {model_name}
+            $R^2$ = {r2:.3f}"""
+
+            ax.text(
+                0.3, 0.01,
+                text,
+                transform=ax.transAxes,
+                fontsize=11
+            )
+
+            plt.tight_layout()
+            plt.show()
+
             print("R²: %.3f ± %.3f" % (scores["test_r2"].mean(), scores["test_r2"].std()))
-            print("RMSE: %.3f ± %.3f" % (-scores["test_rmse"].mean(), scores["test_rmse"].std()))
+            print("RMSE: %.3f ± %.3f" % (-scores["test_mse"].mean(), scores["test_mse"].std()))
             result = {
                 'evaluation': labels[idx],
                 'model': model_name,
                 'r2': scores["test_r2"].mean(),
                 'r2_std': scores["test_r2"].std(),
-                'rmse': -scores["test_rmse"].mean(),
-                'rmse_std': scores["test_rmse"].std()
+                'rmse': -scores["test_mse"].mean(),
+                'rmse_std': scores["test_mse"].std()
                         }
             performance.append(result)
     return performance
