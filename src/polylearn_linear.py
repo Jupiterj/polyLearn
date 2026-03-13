@@ -197,7 +197,7 @@ def compare_components(raw_file, ablation_file, prediction_list, property_list):
             fig, ax = plt.subplots(figsize=(5,5))
 
             # Scatter
-            ax.scatter(all_actual, all_preds, color='red', s=30)
+            ax.scatter(all_actual, all_preds, color='red', s=15)
 
             # Perfect prediction line
             lims = [
@@ -211,8 +211,8 @@ def compare_components(raw_file, ablation_file, prediction_list, property_list):
             ax.set_ylim(lims)
 
             # Labels
-            ax.set_xlabel("Experimental")
-            ax.set_ylabel("Predicted")
+            ax.set_xlabel("Experimental",fontsize = 14)
+            ax.set_ylabel("Predicted",fontsize = 14)
 
             # Text box
             text = f"""Property: {labels[idx]}
@@ -220,10 +220,10 @@ def compare_components(raw_file, ablation_file, prediction_list, property_list):
             $R^2$ = {r2:.3f}"""
 
             ax.text(
-                0.3, 0.01,
+                0.3, 0.05,
                 text,
                 transform=ax.transAxes,
-                fontsize=11
+                fontsize=13
             )
 
             plt.tight_layout()
